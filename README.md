@@ -80,6 +80,8 @@ $errorMessages=$boolResult==FALSE ? $validator->getErrors() : [];
 
 ## Validation Methods
 
+While validating data, the system will add the error message to this data in the validator object if this data is not passed the validation according to the related method.
+
 ### ```required```
 
 To validate the data is not null or not.
@@ -186,6 +188,84 @@ To validate the uploaded file is image or not
 
 $validator->validate($_REQUEST,[
 	'image' => 'image'
+]);
+
+```
+
+### ```confirm```
+
+To validate the "field" is same as "confirm_field" or not
+
+```php
+
+$validator->validate($_REQUEST,[
+	'password' => 'confirmed'
+]);
+
+```
+
+This code is validating the "password" request is same as "confirm_password" or not
+
+### ```min```
+
+If the data is string, it is aimed to validate the number of this data string length is greater than the declared number or not.
+
+```php
+
+$validator->validate($_REQUEST,[
+	'name' => 'min:10'
+]);
+
+```
+
+If the data is number, it is aimed to validate this number is greater than the declared number or not.
+
+```php
+
+$validator->validate($_REQUEST,[
+	'age' => 'min:18'
+]);
+
+```
+
+If the data is uploaded file, it is aimed to validate the size of this uploaded file is greater than the declared MB number or not.
+
+```php
+
+$validator->validate($_REQUEST,[
+	'image' => 'min:3'
+]);
+
+```
+
+### ```max```
+
+If the data is string, it is aimed to validate the number of this data string length is less than the declared number or not.
+
+```php
+
+$validator->validate($_REQUEST,[
+	'name' => 'max:10'
+]);
+
+```
+
+If the data is number, it is aimed to validate this number is less than the declared number or not.
+
+```php
+
+$validator->validate($_REQUEST,[
+	'age' => 'max:18'
+]);
+
+```
+
+If the data is uploaded file, it is aimed to validate the size of this uploaded file is less than the declared MB number or not.
+
+```php
+
+$validator->validate($_REQUEST,[
+	'image' => 'max:3'
 ]);
 
 ```
