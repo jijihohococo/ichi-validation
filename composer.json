@@ -1,0 +1,22 @@
+{
+	"name" : "jijihohococo/ichi-validation",
+	"type": "library",
+	"description": "PHP Validation Library",
+	"keywords": ["php validation","validation","validation for php","php"],
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Lin Aung",
+			"email": "jijihohococo@gmail.com"
+		}
+	],
+	"require": {
+		"php": ">=7.0|>=8.0"
+	},
+	"autoload": {
+		"psr-4": {
+			"JiJiHoHoCoCo\\IchiValidation\\": "src/"
+		}
+	},
+	"minimum-stability": "dev"
+}
