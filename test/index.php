@@ -22,7 +22,7 @@ $testData=[
 
 'test_bool_one' => NULL ,
 'test_bool_two' => 123,
-'pass_bool' => TRUE ,
+'pass_bool' => FALSE ,
 
 
 'test_double_one' => NULL ,

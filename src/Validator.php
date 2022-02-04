@@ -19,6 +19,7 @@ class Validator{
 		'array',
 		'email',
 		'file',
+		'image',
 		'confirmed'
 	];
 
@@ -117,7 +118,10 @@ class Validator{
 	}
 
 	public function checkBoolean(string $key){
-		return !isset($this->data[$key]) || (isset($this->data[$key]) && !is_bool($this->data[$key]) );
+		$availableBooleans=[
+			0,1,'0','1',TRUE,FALSE
+		];
+		return !isset($this->data[$key]) || (isset($this->data[$key]) && !in_array($this->data[$key], $availableBooleans)  );
 	}
 
 	public function checkDouble(string $key){
