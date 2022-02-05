@@ -45,7 +45,7 @@ This package is Open Source According to [MIT license](LICENSE.md)
 
 ```php
 
-composer require jijihohococo/ichi-validation
+composer require jijihohococo/ichi-validation:dev-master
 
 ```
 
@@ -457,5 +457,158 @@ $validator->validate($_REQUEST,[
 ]);
 
 ```
+
+### ```image_ratio```
+
+To validate the uploaded image width and height is same as the declared ratio
+
+```php
+
+$validator->validate($_REQUEST,[
+	'image' => 'image_ratio:1/3'
+]);
+
+```
+
+## Customization
+
+### Customizing Error Message
+
+You can customize the error message for validation
+
+```php
+
+$validator->validate($_REQUEST,[
+	'name' => 'required',
+	'email' => ['required','string','email']
+],[
+	'required' => 'Data is required'
+]);
+
+```
+
+Above code is customizing the error message when the 'required' validation method is not passed.
+
+```php
+
+$validator->validate($_REQUEST,[
+	'name' => 'required',
+	'email' => 'required|string|email'
+],[
+	'name.required' => 'Name is required',
+]);
+
+```
+
+Above code is customizing the error message when the 'required' validation method for 'name' request is not passed.
+
+
+### Customizing Validation Method
+
+If you want to create your own validation method, you must create the validation class.
+
+You can create your validation class via commandline.
+
+Firstly you need to created the file named "ichi" under your project folder and use the below code in this file
+
+```php
+#!/usr/bin/env php
+<?php
+
+require __DIR__.'/vendor/autoload.php';
+
+use JiJiHoHoCoCo\IchiValidation\Command\ValidationCommand;
+
+
+$validationCommand=new ValidationCommand;
+$validationCommand->run(__DIR__,$argv);
+
+```
+
+And then you can create the validation class in your commandline
+
+```php
+
+php ichi make:validation TestValidation
+
+```
+
+The default file folder is "app/Validations". So after making command, the validation class you created will be in the this default file folder. If you want to change the default folder path, you can change it in your "ichi" file.
+
+
+```php
+
+$validationCommand=new ValidationCommand;
+$validationCommand->setPath('new_app/Validations');
+$validationCommand->run(__DIR__,$argv);
+
+```
+
+
+You must set the accepted validation rules in your created validation class.
+Let's make to accept only over age 21 in this created class to validate.
+
+```php
+
+namespace App\Validations;
+use JiJiHoHoCoCo\IchiValidation\CustomValidator;
+
+class TestValidation extends CustomValidator{
+
+
+	public function __construct(){
+
+
+	}
+
+
+	public function rule(){
+
+		return $this->value>21;
+	}
+
+
+	public function showErrorMessage(){
+
+		return 'Your ' .$this->attribute . ' should be over 21.';
+
+	}
+
+
+}
+```
+
+In calling your validation class
+
+```php
+
+use App\Validations\TestValidation;
+
+$validator=new Validator;
+$validator->validate($_REQUEST,[
+	'name' => 'required|string',
+	'age' => ['required',new TestValidation()]
+]);
+```
+
+```php
+
+$this->attribute
+
+```
+
+It is the validation data field name. For the example, we set 'age'.
+
+```php
+
+$this->value
+
+```
+
+It is the data value. For the example, it is the value of 'age' request.
+
+You can pass other values in the constructor.
+
+
 
 

@@ -361,9 +361,9 @@ public function validate(array $data,array $fields,array $customErrorMessages=[]
 			}
 
 			if(is_object($rule) && ($rule instanceof CustomValidator) ){
+				$rule->setAttribute($key);
 				if(isset($this->data[$key])){
-
-					$rule->setAttribute($this->data[$key]);
+					$rule->setValue($this->data[$key]);
 					if(!$rule->rule()){
 						$errors[$key]=$rule->showErrorMessage();
 					}
