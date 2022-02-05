@@ -597,7 +597,7 @@ $this->attribute
 
 ```
 
-It is the validation data field name. For the example, we set 'age'.
+It is the validation data field name. For the example, it is 'age'.
 
 ```php
 
@@ -608,7 +608,3 @@ $this->value
 It is the data value. For the example, it is the value of 'age' request.
 
 You can pass other values in the constructor.
-
-
-
-
