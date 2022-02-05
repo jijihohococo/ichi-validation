@@ -53,7 +53,12 @@ $testData=[
 
 'test_max_one' => NULL,
 'test_max_two' => 4,
-'pass_max' => 3
+'pass_max' => 3 ,
+
+
+'test_between_one' => 4 ,
+'test_between_two' => 0,
+'pass_between' => 2
 ];
 
 $testingRules=[
@@ -103,7 +108,12 @@ $testingRules=[
 
 	'test_max_one' => 'max:3',
 	'test_max_two' => 'max:3',
-	'pass_max' => 'max:3'
+	'pass_max' => 'max:3',
+
+
+	'test_between_one' => 'between:1,3',
+	'test_between_two' => 'between:1,3',
+	'pass_between' => 'between:1,3'
 ];
 
 $customRules=[

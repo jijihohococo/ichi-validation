@@ -269,3 +269,81 @@ $validator->validate($_REQUEST,[
 ]);
 
 ```
+
+### ```unique```
+
+To validate the data is exist in database's table or not
+
+You must set PDO object firstly before using this method
+
+```php
+
+$validator->setPDO($pdoObject);
+
+```
+
+And then you can use this method.
+
+```php
+
+$validator->validate($_REQUEST,[
+	'email' => 'unique:user_table,email_field,NULL'
+]);
+
+```
+
+Above code is validating request 'email' is same as any values of 'email_field' (column) of 'user_table' (table) or not.
+
+Validating the data with this way is used to check the data duplication while inserting new data into database.
+
+You can also make this way to validate the same process.
+
+```php
+
+$validator->validate($_REQUEST,[
+	'email' => 'unique:user_table,email_field,'.NULL
+]);
+
+```
+
+
+
+```php
+
+$validator->validate($_REQUEST,[	
+	'email' => 'unique:user_table,email_field,'. 1
+]);
+
+```
+Above code is validating request 'email' is same as value of 'email_field' (column) where the id is not 1 of 'user_table' (table) or not.
+
+Validating the data with this way is used to check the data duplication while updating the data into database.
+
+It is used where the primary key of the table is 'id'.
+
+If the primary key of the table is not 'id', you must use the below code
+
+```php
+
+$validator->validate($_REQUEST,[
+	'email' => 'unique:user_table,email_field,'. 1.',user_id'
+]);
+
+```
+
+### ```mime```
+
+To validate the uploaded file's extension is one of the specific file extensions or not
+
+```php
+
+$validator->validate($_REQUEST,[
+	'image' => 'mime:png,jpg,jpeg,gif'
+]);
+
+```
+
+
+
+
+

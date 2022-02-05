@@ -97,7 +97,7 @@ class Validator{
 		$this->checkData($key) ||
 		(isset($this->data[$key]) && is_string($this->data[$key]) && strlen($this->data[$key])<$this->number ) ||
 		(isset($this->data[$key]) && is_numeric($this->data[$key]) && $this->data[$key]<$this->number) ||
-		(isset($_FILES[$key]) && $_FILES[$key]['size']<$this->number) ;
+		(isset($_FILES[$key]) && convertToMb($_FILES[$key]['size'])<$this->number) ;
 	}
 
 	public function checkMax(int $number,string $key){
@@ -141,13 +141,11 @@ class Validator{
 			$table=$checkTable[0];
 			$column=$checkTable[1];
 			
-			if(isset($checkTable[2]) && $checkTable[2]!=='' ){
+			if(isset($checkTable[2]) && $checkTable[2]!=='' && $checkTable[2]!=='NULL' ){
 				$id=isset($checkTable[3]) ? $checkTable[3] : 'id';
 				$statement=$pdo->prepare('SELECT  COUNT(*) FROM '.$table.'  WHERE '.$column.'  = ? AND '.$id.' <> ?');
 				$statement->execute([$this->data[$key],$checkTable[2]]);
-			}elseif((isset($checkTable[2]) && $checkTable[2]==NULL ) ||
-				(isset($checkTable[2]) && $checkTable[2]=='NULL' ) || 
-				!isset($checkTable[2]) ){
+			}elseif(isset($checkTable[2]) && ($checkTable[2]==NULL || $checkTable[2]=='NULL' ) ){
 				$statement=$pdo->prepare('SELECT COUNT(*) FROM '.$table.' WHERE '.$column.' = ?');
 				$statement->execute([$this->data[$key]]);
 			}
