@@ -27,6 +27,13 @@ This package is Open Source According to [MIT license](LICENSE.md)
 	* [mime](#mime)
 	* [between](#between)
 	* [dimensions](#dimensions)
+		* [width](#width)
+		* [min_width](#min_width)
+		* [max_width](#max_width)
+		* [height](#height)
+		* [min_height](#min_height)
+		* [max_height](#max_height)
+		* [Using Multiple Sub-Methods](#using-multiple-sub-methods)
 	* [image_ratio](#image_ratio)
 * [Customization](#customization)
 	* [Customizing Error Message](#customizing-error-message)
@@ -208,7 +215,7 @@ This code is validating the "password" request is same as "confirm_password" or 
 
 ### ```min```
 
-If the data is string, it is aimed to validate the number of this data string length is greater than the declared number or not.
+If the data is string, it is aimed to validate the number of this data string length is greater than the declared minimum number or not.
 
 ```php
 
@@ -218,7 +225,7 @@ $validator->validate($_REQUEST,[
 
 ```
 
-If the data is number, it is aimed to validate this number is greater than the declared number or not.
+If the data is number, it is aimed to validate this number is greater than the declared minimum number or not.
 
 ```php
 
@@ -228,7 +235,7 @@ $validator->validate($_REQUEST,[
 
 ```
 
-If the data is uploaded file, it is aimed to validate the size of this uploaded file is greater than the declared MB number or not.
+If the data is uploaded file, it is aimed to validate the size of this uploaded file is greater than the declared minimum MB number or not.
 
 ```php
 
@@ -240,7 +247,7 @@ $validator->validate($_REQUEST,[
 
 ### ```max```
 
-If the data is string, it is aimed to validate the number of this data string length is less than the declared number or not.
+If the data is string, it is aimed to validate the number of this data string length is less than the declared maximum number or not.
 
 ```php
 
@@ -250,7 +257,7 @@ $validator->validate($_REQUEST,[
 
 ```
 
-If the data is number, it is aimed to validate this number is less than the declared number or not.
+If the data is number, it is aimed to validate this number is less than the declared maximum number or not.
 
 ```php
 
@@ -260,7 +267,7 @@ $validator->validate($_REQUEST,[
 
 ```
 
-If the data is uploaded file, it is aimed to validate the size of this uploaded file is less than the declared MB number or not.
+If the data is uploaded file, it is aimed to validate the size of this uploaded file is less than the declared maximum MB number or not.
 
 ```php
 
@@ -343,7 +350,112 @@ $validator->validate($_REQUEST,[
 
 ```
 
+### ```between```
 
+To validate the request number is between the specific two numbers or not
 
+```php
+
+$validator->validate($_REQUEST,[
+	'age' => 'between:18,25'
+]);
+
+```
+### ```dimensions```
+
+To validate the uploaded image is specific dimensions or not
+
+There are sub-methods in this method.
+
+1. ```width```
+2. ```min_width```
+3. ```max_width```
+4. ```height```
+5. ```min_height```
+6. ```max_height```
+
+#### ```width```
+
+To validate the uploaded image's width is delcared width or not
+
+```php
+
+$validator->validate($_REQUEST,[
+	'image' => 'dimensions:width=100' 
+]);
+
+```
+
+#### ```min_width```
+
+To validate the uploaded image's width is greater than the declared minimum width or not
+
+```php
+
+$validator->validate($_REQUEST,[
+	'image' => 'dimensions:min_width=100'
+]);
+
+```
+
+#### ```max_width```
+
+To validate the uploaded image's width is less than the delcared maximum width or not
+
+```php
+
+$validator->validate($_REQUEST,[
+	'image' => 'dimensions:max_width=100'
+]);
+
+```
+
+#### ```height```
+
+To validate the uploaded image's height is delcared width or not
+
+```php
+
+$validator->validate($_REQUEST,[
+	'image' => 'dimensions:height=100'
+]);
+
+```
+
+#### ```min_height```
+
+To validate the uploaded image's height is greater than the declared minimum height or not
+
+```php
+
+$validator->validate($_REQUEST,[
+	'image' => 'dimensions:min_height=100'
+]);
+
+```
+
+#### ```max_height```
+
+To validate the uploaded image's height is less than the delcared maximum height or not
+
+```php
+
+$validator->validate($_REQUEST,[
+	'image' => 'dimensions:max_height=100'
+]);
+
+```
+
+#### Using Multiple Sub-Methods
+
+You can validate your image's dimensions with multiple sub-methods
+
+```php
+
+$validator->validate($_REQUEST,[
+	'image' => 'dimensions:width=100,height=100'
+]);
+
+```
 
 
