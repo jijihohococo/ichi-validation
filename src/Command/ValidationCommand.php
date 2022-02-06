@@ -5,7 +5,7 @@ namespace JiJiHoHoCoCo\IchiValidation\Command;
 use Exception;
 class ValidationCommand{
 
-	private $path='app/Validators';
+	private $path='app/Validations';
 	private $validationCommandLine='make:validation';
 
 
