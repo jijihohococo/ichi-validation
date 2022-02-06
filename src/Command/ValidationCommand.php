@@ -51,22 +51,22 @@ class ".$createdFile." extends CustomValidator{
 
 
 
-		public function __construct(){
+	public function __construct(){
 
 
-		}
+	}
 
 
-		public function rule(){
+	public function rule(){
 
 
-		}
+	}
 
 
-		public function showErrorMessage(){
+	public function showErrorMessage(){
 
 
-		}
+	}
 
 }
 ";
@@ -93,7 +93,7 @@ class ".$createdFile." extends CustomValidator{
 	private function checkContent(string $command,string $defaulFolder,string $createdFile){
 		switch ($command) {
 			case $this->validationCommandLine:
-			return $this->makeModelContent($defaulFolder,$createdFile);
+			return $this->makeValidationContent($defaulFolder,$createdFile);
 			break;
 
 		}
