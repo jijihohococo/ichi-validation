@@ -106,7 +106,7 @@ class Validator{
 		$this->checkData($key) ||
 		(isset($this->data[$key]) && is_string($this->data[$key]) && strlen($this->data[$key])>$this->number ) ||
 		(isset($this->data[$key]) && is_numeric($this->data[$key]) && $this->data[$key]>$this->number) ||
-		(isset($_FILES[$key]) && $_FILES[$key]['size']>$this->number) ;
+		(isset($_FILES[$key]) && convertToMb($_FILES[$key]['size'])>$this->number) ;
 	}
 
 	public function checkInteger(string $key){
