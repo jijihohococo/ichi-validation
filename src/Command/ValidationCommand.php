@@ -5,8 +5,9 @@ namespace JiJiHoHoCoCo\IchiValidation\Command;
 use Exception;
 class ValidationCommand{
 
-	private $path='app/Validations';
-	private $validationCommandLine='make:validation';
+	private $path = 'app/Validations';
+	private $validationCommandLine = 'make:validation';
+	private $createdFile;
 
 
 	public function setPath(string $path){
@@ -126,23 +127,23 @@ class ".$createdFile." extends CustomValidator{
 				$count=count($inputFile);
 
 				if($count==1 && $inputFile[0]!==NULL && !file_exists($baseDir.'/'.$inputFile[0].'.php') ){
-					$createdFile=$inputFile[0];
-					fopen($baseDir.'/'.$createdFile.'.php', 'w') or die('Unable to create '.$createdOption);
-						$createdFileContent=$this->checkContent($command,$defaulFolder,$createdFile);
-						file_put_contents($baseDir.'/'.$createdFile.'.php', $createdFileContent,LOCK_EX);
-						return $this->success($createdFile,$createdOption);
+					$this->createdFile=$inputFile[0];
+					fopen($baseDir.'/'.$this->createdFile.'.php', 'w') or die('Unable to create '.$createdOption);
+					$createdFileContent=$this->checkContent($command,$defaulFolder,$this->createdFile);
+					file_put_contents($baseDir.'/'.$this->createdFile.'.php', $createdFileContent,LOCK_EX);
+					return $this->success($this->createdFile,$createdOption);
 				
 				}elseif($count==1 && $inputFile[0]!==NULL && file_exists($baseDir . '/'.$inputFile[0].'.php') ){
-					$createdFile=$inputFile[0];
+					$this->createdFile=$inputFile[0];
 				
-					return $this->alreadyHave($createdFile,$createdOption);
+					return $this->alreadyHave($this->createdFile,$createdOption);
 				
 				}elseif($count>1 && file_exists($baseDir.'/'. implode('/', $inputFile) . '.php' ) ){
-					$createdFile=implode('/',$inputFile);
-					return $this->alreadyHave($createdFile,$createdOption);
+					$this->createdFile=implode('/',$inputFile);
+					return $this->alreadyHave($this->createdFile,$createdOption);
 				
 				}elseif($count>1 && !file_exists($baseDir .'/'. implode('/', $inputFile) . '.php' ) ){
-					$createdFile=$inputFile[$count-1];
+					$this->createdFile=$inputFile[$count-1];
 					unset($inputFile[$count-1]);
 					$currentFolder=NULL;
 					$newCreatedFolder=NULL;
@@ -154,14 +155,14 @@ class ".$createdFile." extends CustomValidator{
 						}
 					}
 
-					fopen($currentFolder.'/'.$createdFile.'.php', 'w') or die('Unable to create '.$createdOption);
-						$createdFileContent=$this->checkContent($command,$newCreatedFolder,$createdFile);
-						file_put_contents($currentFolder.'/'.$createdFile.'.php', $createdFileContent,LOCK_EX);
-						return $this->success($createdFile,$createdOption);
+					fopen($currentFolder.'/'.$this->createdFile.'.php', 'w') or die('Unable to create '.$createdOption);
+						$createdFileContent=$this->checkContent($command,$newCreatedFolder,$this->createdFile);
+						file_put_contents($currentFolder.'/'.$this->createdFile.'.php', $createdFileContent,LOCK_EX);
+						return $this->success($this->createdFile,$createdOption);
 				}
 			} catch (Exception $e) {
 
-				return $this->createError($createdFile,$createdOption);
+				return $this->createError($this->createdFile,$createdOption);
 				
 			}
 
