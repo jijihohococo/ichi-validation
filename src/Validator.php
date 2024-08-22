@@ -135,7 +135,8 @@ class Validator{
 	public function checkUnique(string $table,string $key,PDO $pdo){
 		if(!isset($this->data[$key])){
 			return TRUE;
-		}elseif(isset($this->data[$key]) ){
+		}
+		if(isset($this->data[$key]) ){
 			
 			$checkTable=explode(',', $table);
 			$table=$checkTable[0];
@@ -172,7 +173,8 @@ class Validator{
 	public function checkImageDimension(array $params,string $key){
 		if($this->checkImage($key)){
 			return TRUE;
-		}elseif(isset($_FILES[$key])){
+		}
+		if(isset($_FILES[$key])){
 			$image=getimagesize($_FILES[$key]['tmp_name']);
 			if(!isset($image[0]) || !isset($image[1]) ){
 				return TRUE;
@@ -237,7 +239,8 @@ class Validator{
 public function checkImageRatio(string $requiredRatio , string $key){
 	if($this->checkImage($key)){
 		return TRUE;
-	}elseif(isset($_FILES[$key])){
+	}
+	if(isset($_FILES[$key])){
 		$image=getimagesize($_FILES[$key]['tmp_name']);
 		if(!isset($image[0]) || !isset($image[1]) ){
 			return TRUE;
@@ -254,11 +257,11 @@ public function checkImageRatio(string $requiredRatio , string $key){
 public function getErrorMessage(string $rule,string $key,string $defaultErrorMessage){
 	if(isset($this->customErrorMessages[$rule])){
 		return $this->customErrorMessages[$rule];
-	}elseif(isset($this->customErrorMessages[$key.'.'.$rule])){
-		return $this->customErrorMessages[$key.'.'.$rule];
-	}else{
-		return $defaultErrorMessage;
 	}
+	if(isset($this->customErrorMessages[$key.'.'.$rule])){
+		return $this->customErrorMessages[$key.'.'.$rule];
+	}
+	return $defaultErrorMessage;
 }
 
 private function throwSystemErrorMessage(){
