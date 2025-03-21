@@ -4,7 +4,7 @@ require_once  __DIR__.'/../src/Validator.php';
 
 use JiJiHoHoCoCo\IchiValidation\Validator;
 
-$testData=[
+$testData = [
 'test_required' => NULL,
 'pass_required' => 'not null',
 
@@ -61,7 +61,7 @@ $testData=[
 'pass_between' => 2
 ];
 
-$testingRules=[
+$testingRules = [
 	
 	'not_from_test_data' => 'required',
 
@@ -116,12 +116,12 @@ $testingRules=[
 	'pass_between' => 'between:1,3'
 ];
 
-$customRules=[
+$customRules = [
 	'custom_rule_required.required' => 'Custom Required Message'
 ];
 
-$validator=new Validator;
-$result=$validator->validate($testData,$testingRules,$customRules);
+$validator = new Validator;
+$result = $validator->validate($testData,$testingRules,$customRules);
 
 print_r($validator->getErrors());
 echo PHP_EOL;

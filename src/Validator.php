@@ -6,11 +6,11 @@ use PDO,Exception;
 
 class Validator{
 
-	private $data=[];
-	private $customErrorMessages=[];
+	private $data = [];
+	private $customErrorMessages = [];
 	private $number;
-	private $errors=[];
-	private $validationMethods=[
+	private $errors = [];
+	private $validationMethods = [
 		'required',
 		'integer',
 		'string',
@@ -23,7 +23,7 @@ class Validator{
 		'confirmed'
 	];
 
-	private $parameterValidationMethods=[
+	private $parameterValidationMethods = [
 		'min',
 		'max',
 		'unique',
@@ -37,7 +37,7 @@ class Validator{
 	private $imageErrorMessage;
 
 	public function setPDO(PDO $pdo){
-		$this->pdo=$pdo;
+		$this->pdo = $pdo;
 	}
 
 	public function getPDO(){
@@ -45,16 +45,15 @@ class Validator{
 	}
 
 	public function setData($data){
-		$this->data=$data;
+		$this->data = $data;
 	}
-
 
 	public function getData(){
 		return $this->data;
 	}
 	
 	public function setErrors($errors){
-		$this->errors=$errors;
+		$this->errors = $errors;
 	}
 
 	public function getErrors(){
@@ -76,11 +75,11 @@ class Validator{
 	}
 
 	public function checkImage($key){
-		return $this->checkFile($key) || (isset($_FILES[$key]) && getimagesize($_FILES[$key]["tmp_name"])==FALSE);
+		return $this->checkFile($key) || (isset($_FILES[$key]) && getimagesize($_FILES[$key]["tmp_name"]) == FALSE);
 	}
 
 	public function  checkRequired($key){
-		return !isset($this->data[$key]) || (isset($this->data[$key]) && $this->data[$key]==null);
+		return !isset($this->data[$key]) || (isset($this->data[$key]) && $this->data[$key] == null);
 	}
 
 	public function checkEmailVerify($key){
@@ -92,21 +91,21 @@ class Validator{
 	}
 
 	public function checkMin(int $number,string $key){
-		$this->number=$number;
+		$this->number = $number;
 		return !isset($this->data[$key]) || 
 		$this->checkData($key) ||
 		(isset($this->data[$key]) && is_string($this->data[$key]) && strlen($this->data[$key])<$this->number ) ||
 		(isset($this->data[$key]) && is_numeric($this->data[$key]) && $this->data[$key]<$this->number) ||
-		(isset($_FILES[$key]) && convertToMb($_FILES[$key]['size'])<$this->number) ;
+		(isset($_FILES[$key]) && convertToMb($_FILES[$key]['size']) < $this->number) ;
 	}
 
 	public function checkMax(int $number,string $key){
-		$this->number=$number;
+		$this->number = $number;
 		return !isset($this->data[$key]) || 
 		$this->checkData($key) ||
 		(isset($this->data[$key]) && is_string($this->data[$key]) && strlen($this->data[$key])>$this->number ) ||
 		(isset($this->data[$key]) && is_numeric($this->data[$key]) && $this->data[$key]>$this->number) ||
-		(isset($_FILES[$key]) && convertToMb($_FILES[$key]['size'])>$this->number) ;
+		(isset($_FILES[$key]) && convertToMb($_FILES[$key]['size']) > $this->number) ;
 	}
 
 	public function checkInteger(string $key){
@@ -118,7 +117,7 @@ class Validator{
 	}
 
 	public function checkBoolean(string $key){
-		$availableBooleans=[
+		$availableBooleans = [
 			0,1,'0','1',TRUE,FALSE
 		];
 		return !isset($this->data[$key]) || (isset($this->data[$key]) && !in_array($this->data[$key], $availableBooleans)  );
@@ -138,16 +137,16 @@ class Validator{
 		}
 		if(isset($this->data[$key]) ){
 			
-			$checkTable=explode(',', $table);
-			$table=$checkTable[0];
-			$column=$checkTable[1];
+			$checkTable = explode(',', $table);
+			$table = $checkTable[0];
+			$column = $checkTable[1];
 			
-			if(isset($checkTable[2]) && $checkTable[2]!=='' && $checkTable[2]!=='NULL' ){
-				$id=isset($checkTable[3]) ? $checkTable[3] : 'id';
-				$statement=$pdo->prepare('SELECT  COUNT(*) FROM '.$table.'  WHERE '.$column.'  = ? AND '.$id.' <> ?');
+			if(isset($checkTable[2]) && $checkTable[2] !== '' && $checkTable[2] !== 'NULL' ){
+				$id = isset($checkTable[3]) ? $checkTable[3] : 'id';
+				$statement = $pdo->prepare('SELECT  COUNT(*) FROM '.$table.'  WHERE '.$column.'  = ? AND '.$id.' <> ?');
 				$statement->execute([$this->data[$key],$checkTable[2]]);
-			}elseif(isset($checkTable[2]) && ($checkTable[2]==NULL || $checkTable[2]=='NULL' ) ){
-				$statement=$pdo->prepare('SELECT COUNT(*) FROM '.$table.' WHERE '.$column.' = ?');
+			}elseif(isset($checkTable[2]) && ($checkTable[2] == NULL || $checkTable[2] == 'NULL' ) ){
+				$statement = $pdo->prepare('SELECT COUNT(*) FROM '.$table.' WHERE '.$column.' = ?');
 				$statement->execute([$this->data[$key]]);
 			}
 			return $statement->fetchColumn()>0;
@@ -163,11 +162,11 @@ class Validator{
 	}
 
 	public function checkConfirmed(string $key){
-		$confirmedField='confirm_'.$key;
+		$confirmedField = 'confirm_'.$key;
 		return !isset($this->data[$confirmedField]) ||
 		!isset($this->data[$key]) ||
 		(isset($this->data[$confirmedField]) && isset($this->data[$key]) &&
-			$this->data[$confirmedField]!==$this->data[$key]  );
+			$this->data[$confirmedField] !== $this->data[$key]  );
 	}
 
 	public function checkImageDimension(array $params,string $key){
@@ -175,19 +174,19 @@ class Validator{
 			return TRUE;
 		}
 		if(isset($_FILES[$key])){
-			$image=getimagesize($_FILES[$key]['tmp_name']);
+			$image = getimagesize($_FILES[$key]['tmp_name']);
 			if(!isset($image[0]) || !isset($image[1]) ){
 				return TRUE;
 			}
-			$imageWidth=$image[0];
-			$imageHeight=$image[1];
-			$rules=FALSE;
-			$message=NULL;
-			$availableMethods=['width','min_width','max_width','height','min_height','max_height'];
+			$imageWidth = $image[0];
+			$imageHeight = $image[1];
+			$rules = FALSE;
+			$message = NULL;
+			$availableMethods = ['width','min_width','max_width','height','min_height','max_height'];
 
 			foreach ($params as $key => $subMethod) {
 
-				$subMethodArray=explode('=', $subMethod);
+				$subMethodArray = explode('=', $subMethod);
 				if(count($subMethodArray)!==2 || 
 					(count($subMethodArray)==2 &&   
 						( !in_array($subMethodArray[0],$availableMethods) || !is_numeric($subMethodArray[1]) )
@@ -196,40 +195,39 @@ class Validator{
 			}
 			switch ($subMethodArray[0]) {
 				case 'width':
-				$rules=$imageWidth!==$subMethodArray[1];
-				$message= $key . "'s width is not ".$subMethodArray[1];
+				$rules = $imageWidth !== $subMethodArray[1];
+				$message = $key . "'s width is not ".$subMethodArray[1];
 				break;
 
 				case 'min_width':
-				$rules=$imageWidth<$subMethodArray[1];
-				$message= $key ."'s width is less than ".$subMethodArray[1];
+				$rules = $imageWidth<$subMethodArray[1];
+				$message = $key ."'s width is less than ".$subMethodArray[1];
 				break;
 
 				case 'max_width':
-				$rules=$imageWidth>$subMethodArray[1];
-				$message=$key ."'s width is greater than ".$subMethodArray[1];
+				$rules = $imageWidth>$subMethodArray[1];
+				$message = $key ."'s width is greater than ".$subMethodArray[1];
 				break;
 
 				case 'height':
-				$rules=$imageHeight!==$subMethodArray[1];
-				$message=$key ."'s height is not ".$subMethodArray[1];
+				$rules = $imageHeight !== $subMethodArray[1];
+				$message = $key ."'s height is not ".$subMethodArray[1];
 				break;
 
 				case 'min_height':
-				$rules=$imageHeight<$subMethodArray[1];
-				$message=$key ."'s height is less than ".$subMethodArray[1];
+				$rules = $imageHeight<$subMethodArray[1];
+				$message = $key ."'s height is less than ".$subMethodArray[1];
 				break;
 
 				case 'max_height':
-				$rules=$imageHeight>$subMethodArray[1];
-				$message=$key ."'s height is greater than ".$subMethodArray[1];
+				$rules = $imageHeight>$subMethodArray[1];
+				$message = $key ."'s height is greater than ".$subMethodArray[1];
 				break;
 			}
-			if($rules==TRUE){
-				$this->imageErrorMessage=$message;
+			if($rules == TRUE){
+				$this->imageErrorMessage = $message;
 				return TRUE;
 			}
-
 		}
 	}
 }
@@ -245,12 +243,12 @@ public function checkImageRatio(string $requiredRatio , string $key){
 		if(!isset($image[0]) || !isset($image[1]) ){
 			return TRUE;
 		}
-		$imageWidth=$image[0];
-		$imageHeight=$image[1];
+		$imageWidth = $image[0];
+		$imageHeight = $image[1];
 
 		$divisor = gmp_intval( gmp_gcd( $imageWidth, $imageHeight ) );
 		$aspectRatio = $imageWidth / $divisor . '/' . $imageHeight / $divisor;
-		return $aspectRatio!==$requiredRatio;
+		return $aspectRatio !== $requiredRatio;
 	}
 }
 
@@ -277,35 +275,35 @@ private function checkCountString($countRuleString){
 }
 
 private function checkValidationMethods($countRuleString,$rule){
-	return $countRuleString==1 && !in_array($rule, $this->validationMethods);
+	return $countRuleString == 1 && !in_array($rule, $this->validationMethods);
 }
 
 private function checkParameterValidationMethods($countRuleString,$ruleString){
-	return $countRuleString==2 && !in_array($ruleString[0],$this->parameterValidationMethods);
+	return $countRuleString == 2 && !in_array($ruleString[0],$this->parameterValidationMethods);
 }
 
 private function checkMinAndMax($countRuleString,$ruleString){
-	return  $countRuleString==2 && ($ruleString[0]=='min' || $ruleString[0]=='max' ) && !is_numeric($ruleString[1]);
+	return  $countRuleString == 2 && ($ruleString[0] == 'min' || $ruleString[0]=='max' ) && !is_numeric($ruleString[1]);
 }
 
 private function checkMimeError($countRuleString,$ruleString,$countParams){
-	return $countRuleString==2 && $ruleString[0]=='mime' && $countParams==0;
+	return $countRuleString == 2 && $ruleString[0] == 'mime' && $countParams==0;
 }
 
 private function checkUniqueError($countRuleString,$ruleString,$countParams){
-	return $countRuleString==2 && $ruleString[0]=='unique' && 
-	($countParams <2 || $countParams >4);
+	return $countRuleString == 2 && $ruleString[0] == 'unique' && 
+	($countParams < 2 || $countParams > 4);
 }
 
 private function checkImageDimensionError($countRuleString,$ruleString,$countParams){
-	return $countRuleString==2 && $ruleString[0]=='dimensions' && $countParams<1;
+	return $countRuleString == 2 && $ruleString[0] == 'dimensions' && $countParams < 1;
 }
 
 private function checkImageRatioError($countRuleString,$ruleString){
-	if($countRuleString==2 && $ruleString[0]=='image_ratio'){
-		$ratio=explode('/', $ruleString[1]);
-		$count=count($ratio);
-		if($count!==2 || ($count==2 && 
+	if($countRuleString == 2 && $ruleString[0] == 'image_ratio'){
+		$ratio = explode('/', $ruleString[1]);
+		$count = count($ratio);
+		if($count !== 2 || ($count == 2 && 
 			(!is_numeric($ratio[0]) || !is_numeric($ratio[1]) ) ) ){
 			return TRUE;
 		}
@@ -313,22 +311,22 @@ private function checkImageRatioError($countRuleString,$ruleString){
 }
 
 private function checkBetweenErrorOne($countRuleString,$ruleString,$countParams){
-	return $countRuleString==2 && $ruleString[0]=='between' && $countParams!==2;
+	return $countRuleString == 2 && $ruleString[0] == 'between' && $countParams !== 2;
 }
 
 private function checkBetweenErrorTwo($countRuleString,$ruleString,$countParams,$params){
-	return $countRuleString==2 && $ruleString[0]=='between' && $countParams==2 && 
+	return $countRuleString == 2 && $ruleString[0] == 'between' && $countParams == 2 && 
 	(!is_numeric($params[0]) || !is_numeric($params[1]));
 }
 
 public function validate(array $data,array $fields,array $customErrorMessages=[]){
-	$pdo=$this->getPDO();
+	$pdo = $this->getPDO();
 	if(empty($data)){
 		throw new Exception("Please don't add empty array data", 1);
 	}
 	$this->setData($data);
-	$this->customErrorMessages=$customErrorMessages;
-	$errors=[];
+	$this->customErrorMessages = $customErrorMessages;
+	$errors = [];
 	foreach($fields as $key => $field){
 		if(!is_string($key)){
 			throw new Exception("Please add string for the data field to validate", 1);	
@@ -337,14 +335,14 @@ public function validate(array $data,array $fields,array $customErrorMessages=[]
 			throw new Exception("You set the validation rules in string or array", 1);
 
 		}
-		$validatedRules=is_array($field) ? $field : explode('|', $field);
+		$validatedRules = is_array($field) ? $field : explode('|', $field);
 
 		foreach($validatedRules as $rule){
 
-			$ruleString=explode(':', $rule);
-			$countRuleString=count($ruleString);
-			$params=$countRuleString==2 ? explode(',',$ruleString[1]) : NULL;
-			$countParams=$params!==NULL ? count($params) : 0;
+			$ruleString = explode(':', $rule);
+			$countRuleString = count($ruleString);
+			$params = $countRuleString == 2 ? explode(',',$ruleString[1]) : NULL;
+			$countParams = $params !== NULL ? count($params) : 0;
 
 			if(
 				$this->checkCustomValidatior($rule) ||
@@ -360,7 +358,6 @@ public function validate(array $data,array $fields,array $customErrorMessages=[]
 				$this->checkImageRatioError($countRuleString,$ruleString)
 			){
 				$this->throwSystemErrorMessage();
-					//throw new Exception("You are making unavailable validation", 1);
 			}
 
 			if(is_object($rule) && ($rule instanceof CustomValidator) ){
@@ -368,10 +365,10 @@ public function validate(array $data,array $fields,array $customErrorMessages=[]
 				if(isset($this->data[$key])){
 					$rule->setValue($this->data[$key]);
 					if(!$rule->rule()){
-						$errors[$key]=$rule->showErrorMessage();
+						$errors[$key] = $rule->showErrorMessage();
 					}
 				}else{
-					$errors[$key]=$rule->showErrorMessage();
+					$errors[$key] = $rule->showErrorMessage();
 				}
 				break;
 			}
@@ -381,63 +378,63 @@ public function validate(array $data,array $fields,array $customErrorMessages=[]
 				switch ($rule) {
 					case 'required':
 					if($this->checkRequired($key)){
-						$errors[$key]=$this->getErrorMessage($rule , $key , $key . ' is required');
+						$errors[$key] = $this->getErrorMessage($rule , $key , $key . ' is required');
 					}
 					break;
 
 					case 'email':
 					if($this->checkEmailVerify($key)){
-						$errors[$key]=$this->getErrorMessage( $rule , $key , $key . ' is not valid email address');
+						$errors[$key] = $this->getErrorMessage( $rule , $key , $key . ' is not valid email address');
 					}
 					break;
 
 					case 'integer':
 					if($this->checkInteger($key)){
-						$errors[$key]=$this->getErrorMessage( $rule , $key , $key . ' is not integer');
+						$errors[$key] = $this->getErrorMessage( $rule , $key , $key . ' is not integer');
 					}
 					break;
 
 					case 'string':
 					if($this->checkString($key)){
-						$errors[$key]=$this->getErrorMessage( $rule , $key , $key . ' is not string');
+						$errors[$key] = $this->getErrorMessage( $rule , $key , $key . ' is not string');
 					}
 					break;
 
 
 					case 'file':
 					if($this->checkFile($key)){
-						$errors[$key]=$this->getErrorMessage( $rule , $key , $key . ' is not a file' );
+						$errors[$key] = $this->getErrorMessage( $rule , $key , $key . ' is not a file' );
 					}
 					break;
 
 					case 'image':
 					if($this->checkImage($key)){
-						$errors[$key]=$this->getErrorMessage( $rule , $key , $key . ' is not image');
+						$errors[$key] = $this->getErrorMessage( $rule , $key , $key . ' is not image');
 					}
 					break;
 
 					case 'bool':
 					if($this->checkBoolean($key)){
-						$errors[$key]=$this->getErrorMessage( $rule , $key , $key . ' is not boolean');
+						$errors[$key] = $this->getErrorMessage( $rule , $key , $key . ' is not boolean');
 					}
 					break;
 
 					case 'double':
 					if($this->checkDouble($key)){
-						$errors[$key]=$this->getErrorMessage( $rule , $key , $key . ' is not double');
+						$errors[$key] = $this->getErrorMessage( $rule , $key , $key . ' is not double');
 					}
 					break;
 
 					case 'array':
 					if($this->checkArray($key)){
-						$errors[$key]=$this->getErrorMessage( $rule , $key , $key . ' is not array');
+						$errors[$key] = $this->getErrorMessage( $rule , $key , $key . ' is not array');
 					}
 					break;
 
 
 					case 'confirmed':
 					if($this->checkConfirmed($key)){
-						$errors[$key]=$this->getErrorMessage( $rule , $key , 'confirm_'.  $key . ' is not same as '.$key );
+						$errors[$key] = $this->getErrorMessage( $rule , $key , 'confirm_'.  $key . ' is not same as '.$key );
 					}
 					break;
 
@@ -448,48 +445,48 @@ public function validate(array $data,array $fields,array $customErrorMessages=[]
 				switch ($ruleString[0]) {
 					case 'min':
 					if($this->checkMin($ruleString[1],$key)){
-						$errors[$key]=$this->getErrorMessage( $rule , $key , $key . ' has less than ' . $this->number . ' characters');
+						$errors[$key] = $this->getErrorMessage( $rule , $key , $key . ' has less than ' . $this->number . ' characters');
 					}
 					break;
 
 					case 'max':
 					if($this->checkMax($ruleString[1],$key)){
-						$errors[$key]=$this->getErrorMessage( $rule , $key , $key . ' has more than ' . $this->number . ' characters');
+						$errors[$key] = $this->getErrorMessage( $rule , $key , $key . ' has more than ' . $this->number . ' characters');
 					}
 					break;
 
 					case 'unique':
 					if($this->checkUnique($ruleString[1],$key,$pdo)){
-						$errors[$key]=$this->getErrorMessage( $rule , $key , $key  . '  has been already saved');	
+						$errors[$key] = $this->getErrorMessage( $rule , $key , $key  . '  has been already saved');	
 					}
 					break;
 
 					case 'mime':
 					if($this->checkMime($params,$key)){
-						$errors[$key]=$this->getErrorMessage( $rule , $key , $key . ' is not '.$ruleString[1].' files' );
+						$errors[$key] = $this->getErrorMessage( $rule , $key , $key . ' is not '.$ruleString[1].' files' );
 					}
 					break;
 
 					case 'between':
-					$numberOne=$params[0];
-					$numberTwo=$params[1];
+					$numberOne = $params[0];
+					$numberTwo = $params[1];
 					if($this->checkBetween($numberOne,$numberTwo,$key)){
-						$errors[$key]=$this->getErrorMessage($rule,$key,$key . ' is not between '.$numberOne.' and '.$numberTwo);
+						$errors[$key] = $this->getErrorMessage($rule,$key,$key . ' is not between '.$numberOne.' and '.$numberTwo);
 					}
 					break;
 
 					case 'dimensions':
 					if($this->checkImageDimension($params,$key)){
-						$errors[$key]=$this->getErrorMessage($rule,$key,$this->imageErrorMessage);
+						$errors[$key] = $this->getErrorMessage($rule,$key,$this->imageErrorMessage);
 					}
 					break;
 
 					case 'image_ratio':
-					$ratios=explode('/', $ruleString[1]);
-					$widthRatio=$ratios[0];
-					$heightRatio=$ratios[1];
+					$ratios = explode('/', $ruleString[1]);
+					$widthRatio = $ratios[0];
+					$heightRatio = $ratios[1];
 					if($this->checkImageRatio($ruleString[1],$key)){
-						$errors[$key]=$this->getErrorMessage($rule,$key,$key . ' is not the '.$widthRatio.'/'.$heightRatio );
+						$errors[$key] = $this->getErrorMessage($rule,$key,$key . ' is not the '.$widthRatio.'/'.$heightRatio );
 					}
 					break;
 				}

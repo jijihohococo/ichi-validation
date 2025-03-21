@@ -8,36 +8,40 @@ This package is Open Source According to [MIT license](LICENSE.md)
 
 ## Table of Content
 
-* [Installation](#installation)
-* [Testing](#testing)
-* [Validation Methods](#validation-methods)
-	* [required](#required)
-	* [integer](#integer)
-	* [string](#string)
-	* [bool](#bool)
-	* [double](#double)
-	* [array](#array)
-	* [email](#email)
-	* [file](#file)
-	* [image](#image)
-	* [confirm](#confirm)
-	* [min](#min)
-	* [max](#max)
-	* [unique](#unique)
-	* [mime](#mime)
-	* [between](#between)
-	* [dimensions](#dimensions)
-		* [width](#width)
-		* [min_width](#min_width)
-		* [max_width](#max_width)
-		* [height](#height)
-		* [min_height](#min_height)
-		* [max_height](#max_height)
-		* [Using Multiple Sub-Methods](#using-multiple-sub-methods)
-	* [image_ratio](#image_ratio)
-* [Customization](#customization)
-	* [Customizing Error Message](#customizing-error-message)
-	* [Customizing Validation Method](#customizing-validation-method)
+- [Ichi Validation](#ichi-validation)
+	- [License](#license)
+	- [Table of Content](#table-of-content)
+	- [Installation](#installation)
+	- [Testing](#testing)
+	- [Using](#using)
+	- [Validation Methods](#validation-methods)
+		- [```required```](#required)
+		- [```integer```](#integer)
+		- [```string```](#string)
+		- [```bool```](#bool)
+		- [```double```](#double)
+		- [```array```](#array)
+		- [```email```](#email)
+		- [```file```](#file)
+		- [```image```](#image)
+		- [```confirm```](#confirm)
+		- [```min```](#min)
+		- [```max```](#max)
+		- [```unique```](#unique)
+		- [```mime```](#mime)
+		- [```between```](#between)
+		- [```dimensions```](#dimensions)
+			- [```width```](#width)
+			- [```min_width```](#min_width)
+			- [```max_width```](#max_width)
+			- [```height```](#height)
+			- [```min_height```](#min_height)
+			- [```max_height```](#max_height)
+			- [Using Multiple Sub-Methods](#using-multiple-sub-methods)
+		- [```image_ratio```](#image_ratio)
+	- [Customization](#customization)
+		- [Customizing Error Message](#customizing-error-message)
+		- [Customizing Validation Method](#customizing-validation-method)
 
 
 ## Installation
@@ -69,8 +73,8 @@ We want to validate that 'name' is not null, 'age' must be integer and 'email' m
 
 use JiJiHoHoCoCo\IchiValidation\Validator;
 
-$validator=new Validator();
-$boolResult=$validator->validate($_REQUEST,[
+$validator = new Validator();
+$boolResult = $validator->validate($_REQUEST,[
 	'name' => 'required' ,
 	'age' => 'required|integer' ,
 	'email' => ['required','email']
@@ -520,7 +524,7 @@ require __DIR__.'/vendor/autoload.php';
 use JiJiHoHoCoCo\IchiValidation\Command\ValidationCommand;
 
 
-$validationCommand=new ValidationCommand;
+$validationCommand = new ValidationCommand;
 $validationCommand->run(__DIR__,$argv);
 
 ```
@@ -538,7 +542,7 @@ The default file folder is "app/Validations". So after making command, the valid
 
 ```php
 
-$validationCommand=new ValidationCommand;
+$validationCommand = new ValidationCommand;
 $validationCommand->setPath('new_app/Validations');
 $validationCommand->run(__DIR__,$argv);
 
@@ -584,7 +588,7 @@ In calling your validation class
 
 use App\Validations\TestValidation;
 
-$validator=new Validator;
+$validator = new Validator;
 $validator->validate($_REQUEST,[
 	'name' => 'required|string',
 	'age' => ['required',new TestValidation()]

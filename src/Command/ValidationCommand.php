@@ -78,7 +78,6 @@ class ".$createdFile." extends CustomValidator{
 			case $this->validationCommandLine:
 			return 'Validation';
 			break;
-			
 		}
 	}
 
@@ -96,7 +95,6 @@ class ".$createdFile." extends CustomValidator{
 			case $this->validationCommandLine:
 			return $this->makeValidationContent($defaulFolder,$createdFile);
 			break;
-
 		}
 	}
 
@@ -104,18 +102,18 @@ class ".$createdFile." extends CustomValidator{
 
 	public function run(string $dir,array $argv){
 
-		if(count($argv)==3 && $argv[1]==$this->validationCommandLine ){
-			$command=$argv[1];
-			$createdOption=$this->checkOption($command);
-			$defaulFolder=$this->checkPath($command);
-			$baseDir=$dir.'/'.$defaulFolder;
+		if(count($argv) == 3 && $argv[1] == $this->validationCommandLine ){
+			$command = $argv[1];
+			$createdOption = $this->checkOption($command);
+			$defaulFolder = $this->checkPath($command);
+			$baseDir = $dir.'/'.$defaulFolder;
 			if(substr($argv[2], -1)=='/'){
 				return $this->wrongCommand();
 			}
 			try {
 				if(!is_dir($baseDir)){
-					$createdFolder=NULL;
-					$basefolder=explode('/', $defaulFolder);
+					$createdFolder = NULL;
+					$basefolder = explode('/', $defaulFolder);
 					foreach($basefolder as $key => $folder){
 						$createdFolder .= $key == 0 ? $dir . '/' . $folder : '/' . $folder;
 						if(!is_dir($createdFolder)){
@@ -123,52 +121,46 @@ class ".$createdFile." extends CustomValidator{
 						}
 					}
 				}
-				$inputFile=explode('/',$argv[2]);
-				$count=count($inputFile);
+				$inputFile = explode('/',$argv[2]);
+				$count = count($inputFile);
 
-				if($count==1 && $inputFile[0]!==NULL && !file_exists($baseDir.'/'.$inputFile[0].'.php') ){
-					$this->createdFile=$inputFile[0];
+				if($count == 1 && $inputFile[0] !== NULL && !file_exists($baseDir.'/'.$inputFile[0].'.php') ){
+					$this->createdFile = $inputFile[0];
 					fopen($baseDir.'/'.$this->createdFile.'.php', 'w') or die('Unable to create '.$createdOption);
-					$createdFileContent=$this->checkContent($command,$defaulFolder,$this->createdFile);
+					$createdFileContent = $this->checkContent($command,$defaulFolder,$this->createdFile);
 					file_put_contents($baseDir.'/'.$this->createdFile.'.php', $createdFileContent,LOCK_EX);
 					return $this->success($this->createdFile,$createdOption);
 				
 				}
-				if($count==1 && $inputFile[0]!==NULL && file_exists($baseDir . '/'.$inputFile[0].'.php') ){
-					$this->createdFile=$inputFile[0];
-				
+				if($count == 1 && $inputFile[0] !== NULL && file_exists($baseDir . '/'.$inputFile[0].'.php') ){
+					$this->createdFile = $inputFile[0];
 					return $this->alreadyHave($this->createdFile,$createdOption);
-				
 				}
-				if($count>1 && file_exists($baseDir.'/'. implode('/', $inputFile) . '.php' ) ){
-					$this->createdFile=implode('/',$inputFile);
+				if($count > 1 && file_exists($baseDir.'/'. implode('/', $inputFile) . '.php' ) ){
+					$this->createdFile = implode('/',$inputFile);
 					return $this->alreadyHave($this->createdFile,$createdOption);
-				
 				}
 				if($count>1 && !file_exists($baseDir .'/'. implode('/', $inputFile) . '.php' ) ){
-					$this->createdFile=$inputFile[$count-1];
+					$this->createdFile = $inputFile[$count-1];
 					unset($inputFile[$count-1]);
-					$currentFolder=NULL;
-					$newCreatedFolder=NULL;
+					$currentFolder = NULL;
+					$newCreatedFolder = NULL;
 					foreach($inputFile as $key => $folder){
 						$currentFolder .= $key == 0 ? $baseDir . '/' . $folder : '/' . $folder;
-						$newCreatedFolder .= $key ==0 ? $defaulFolder . '/' . $folder : '/' . $folder;
+						$newCreatedFolder .= $key == 0 ? $defaulFolder . '/' . $folder : '/' . $folder;
 						if(!is_dir($currentFolder)){
 							mkdir($currentFolder);
 						}
 					}
 
 					fopen($currentFolder.'/'.$this->createdFile.'.php', 'w') or die('Unable to create '.$createdOption);
-						$createdFileContent=$this->checkContent($command,$newCreatedFolder,$this->createdFile);
+						$createdFileContent = $this->checkContent($command,$newCreatedFolder,$this->createdFile);
 						file_put_contents($currentFolder.'/'.$this->createdFile.'.php', $createdFileContent,LOCK_EX);
 						return $this->success($this->createdFile,$createdOption);
 				}
 			} catch (Exception $e) {
-
-				return $this->createError($this->createdFile,$createdOption);
-				
+				return $this->createError($this->createdFile,$createdOption);	
 			}
-
 		}
 	}
 

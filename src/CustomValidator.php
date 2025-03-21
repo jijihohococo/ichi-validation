@@ -11,7 +11,7 @@ abstract class CustomValidator{
 	abstract public function showErrorMessage();
 
 	public function setValue($value){
-		$this->value=$value;
+		$this->value = $value;
 	}
 
 	public function getValue(){
