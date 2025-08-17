@@ -48,27 +48,23 @@ class ValidationCommand{
 namespace ". $this->getNamespace( $defaulFolder ).";
 use JiJiHoHoCoCo\IchiValidation\CustomValidator;
 
-class ".$createdFile." extends CustomValidator{
+class ".$createdFile." extends CustomValidator
+{
 
-
-
-	public function __construct(){
-
-
+	public function __construct()
+	{
+		//
 	}
 
-
-	public function rule(){
-
-
+	public function rule()
+	{
+		//
 	}
 
-
-	public function showErrorMessage(){
-
-
+	public function showErrorMessage()
+	{
+		//
 	}
-
 }
 ";
 	}
@@ -80,7 +76,6 @@ class ".$createdFile." extends CustomValidator{
 			break;
 		}
 	}
-
 
 	private function checkPath(string $command){
 		switch ($command) {
@@ -97,8 +92,6 @@ class ".$createdFile." extends CustomValidator{
 			break;
 		}
 	}
-
-
 
 	public function run(string $dir,array $argv){
 
