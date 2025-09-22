@@ -1,106 +1,35 @@
-name: PHP Auto-Fix & Quality Check
+name: PHP Quality
 
 on:
-  push:
-    branches:
-      - '**'
-  pull_request:
-    types: [opened, synchronize, reopened]
+  workflow_run:
+    workflows: ["PHPCBF Auto-Fix"]   # must match the name above
+    types:
+      - completed
 
 jobs:
-  # 🔧 Auto-fix coding standards (only once, PHP 8.1)
-  phpcbf-fix:
-    runs-on: ubuntu-latest
-    steps:
-      # 1️⃣ Checkout code
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref || github.ref_name }}
-          persist-credentials: false  # allows bot to push fixes
-
-      # 2️⃣ Setup PHP (single version for auto-fix)
-      - name: Setup PHP 8.3
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 8.3
-          coverage: none
-
-      # 3️⃣ Install PHPCS
-      - name: Install PHPCS
-        run: |
-          composer global require squizlabs/php_codesniffer
-          echo "$HOME/.config/composer/vendor/bin" >> $GITHUB_PATH
-
-      # 4️⃣ Run PHPCBF (auto-fix issues)
-      - name: Run PHPCBF
-        run: |
-          # Run PHPCBF but ignore exit code so workflow continues
-          phpcbf --standard=PSR12 phpcbf/ || true
-
-          # Check if PHPCBF changed any files
-          if ! git diff --quiet; then
-            echo "PHPCBF_CHANGED=true" >> $GITHUB_ENV
-          else
-            echo "PHPCBF_CHANGED=false" >> $GITHUB_ENV
-          fi
-
-      # 5️⃣ Commit & push fixes back to branch
-      - name: Commit and push PHPCBF fixes
-        if: env.PHPCBF_CHANGED == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Add all PHPCBF-modified files
-          git add .
-
-          # Commit with message
-          git commit -m "PHPCBF: auto-fix coding standards"
-
-          # Determine branch to push
-          BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
-
-          # Pull latest to avoid push rejection
-          git fetch origin $BRANCH
-          git rebase origin/$BRANCH
-
-          # Push PHPCBF fixes
-          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git HEAD:$BRANCH
-
-  # 🧪 Run PHPCS + PHPStan on multiple PHP versions
   php-quality:
     runs-on: ubuntu-latest
-    needs: phpcbf-fix
     strategy:
       fail-fast: false
       matrix:
         php-version: [7.3, 7.4, 8.0, 8.1, 8.2, 8.3]
 
     steps:
-      # 1️⃣ Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup PHP for matrix
       - name: Setup PHP ${{ matrix.php-version }}
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-          coverage: none
 
-      # 3️⃣ Install PHPStan + PHPCS
-      - name: Install PHPStan and PHPCS
+      - name: Install PHPStan + PHPCS
         run: |
           composer global require phpstan/phpstan squizlabs/php_codesniffer
           echo "$HOME/.config/composer/vendor/bin" >> $GITHUB_PATH
 
-      # 4️⃣ Run PHPStan
       - name: Run PHPStan
         run: phpstan analyse src --memory-limit=1G
 
-      # 5️⃣ Run PHPCS
-      - name: Run PHPCS (lint only)
-        run: phpcs --standard=PSR12 --warning-severity=0 src/
+      - name: Run PHPCS
+        run: phpcs --standard=PSR12 --warning-severity=0 phpcbf/

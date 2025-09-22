@@ -2,8 +2,10 @@
 
 class PHPCBF_POC
 {
-    public function test()
-    {
-        echo "test";
-    }
+
+    private $name, $category;
+public function test()
+{
+    echo "test";
+}
 }
