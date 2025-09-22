@@ -1,10 +1,15 @@
-name: PHP Quality
+name: PHP Quality Check
 
 on:
   workflow_run:
-    workflows: ["PHPCBF Auto-Fix"]   # must match the name above
+    workflows: ["PHPCBF Auto-Fix"]
     types:
       - completed
+  push:
+    branches:
+      - '**'
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   php-quality:
@@ -15,21 +20,27 @@ jobs:
         php-version: [7.3, 7.4, 8.0, 8.1, 8.2, 8.3]
 
     steps:
+      # 1️⃣ Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 2️⃣ Setup PHP for matrix
       - name: Setup PHP ${{ matrix.php-version }}
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
+          coverage: none
 
-      - name: Install PHPStan + PHPCS
+      # 3️⃣ Install PHPStan + PHPCS
+      - name: Install PHPStan and PHPCS
         run: |
           composer global require phpstan/phpstan squizlabs/php_codesniffer
           echo "$HOME/.config/composer/vendor/bin" >> $GITHUB_PATH
 
+      # 4️⃣ Run PHPStan
       - name: Run PHPStan
-        run: phpstan analyse src --memory-limit=1G
+        run: phpstan analyse phpcbf --memory-limit=1G
 
+      # 5️⃣ Run PHPCS (ignore warnings)
       - name: Run PHPCS
         run: phpcs --standard=PSR12 --warning-severity=0 phpcbf/
