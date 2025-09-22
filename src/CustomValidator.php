@@ -4,7 +4,8 @@ namespace JiJiHoHoCoCo\IchiValidation;
 
 abstract class CustomValidator
 {
-    private $attribute,$value;
+    private $attribute;
+    private $value;
 
     abstract public function rule();
 
