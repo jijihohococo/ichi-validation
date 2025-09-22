@@ -36,7 +36,7 @@ jobs:
       - name: Run PHPCBF
         run: |
           # Run PHPCBF but ignore exit code so workflow continues
-          phpcbf --standard=PSR12 src/
+          phpcbf --standard=PSR12 phpcbf/ || true
 
           # Check if PHPCBF changed any files
           if ! git diff --quiet; then
