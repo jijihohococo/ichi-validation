@@ -1,6 +1,6 @@
 <?php
 
-class POC
+class Poc
 {
     private $name, $category;
     public function test()
