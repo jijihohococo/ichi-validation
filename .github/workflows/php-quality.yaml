@@ -69,19 +69,21 @@ jobs:
             exit 0
           fi
 
-          # No files changed by PHPCBF — run PHPCS to determine if there are remaining issues.
-          echo "No files changed by PHPCBF. Running PHPCS to check for remaining issues..."
-          phpcs --standard=PSR12 --warning-severity=0 phpcbf/ 2>&1 | tee phpcs-output.txt
-          PHPCS_EXIT=${PIPESTATUS[0]}
-
-          if [ "$PHPCS_EXIT" -eq 0 ]; then
-            echo "No lint errors found. Finishing job."
+          # No files changed by PHPCBF.
+          if [ "$EXIT_CODE" -eq 0 ]; then
+            echo "PHPCBF completed with no changes and no errors. Finishing job."
             exit 0
           fi
 
-          echo "Lint errors remain (PHPCS exit $PHPCS_EXIT). Show outputs:"
+          # PHPCBF returned non-zero and made no changes -> show diagnostics and run PHPCS
+          echo "PHPCBF exited with code $EXIT_CODE and made no changes. Showing outputs and running PHPCS for details:"
           echo "---- PHPCBF output ----"
           cat phpcbf-output.txt || true
+
+          echo "Running PHPCS to list remaining issues..."
+          phpcs --standard=PSR12 --warning-severity=0 phpcbf/ 2>&1 | tee phpcs-output.txt
+          PHPCS_EXIT=${PIPESTATUS[0]}
+
           echo "---- PHPCS output ----"
           cat phpcs-output.txt || true
 
