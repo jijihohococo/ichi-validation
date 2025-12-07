@@ -34,6 +34,7 @@ jobs:
           echo "$HOME/.config/composer/vendor/bin" >> $GITHUB_PATH
 
       # 4️⃣ Run PHPCBF (auto-fix issues). Fail on phpcbf error. If fixes applied, commit, re-check and push.
+      # ...existing code...
       - name: Run PHPCBF and commit fixes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -44,18 +45,13 @@ jobs:
           phpcbf --standard=PSR12 phpcbf/ 2>&1 | tee phpcbf-output.txt
           EXIT_CODE=${PIPESTATUS[0]}
 
-          if [ "$EXIT_CODE" -ne 0 ]; then
-            echo "PHPCBF exited with code $EXIT_CODE. See output:"
-            cat phpcbf-output.txt || true
-            exit $EXIT_CODE
-          fi
-
+          # If PHPCBF changed files -> commit, verify and push
           if ! git diff --quiet; then
             echo "PHPCBF modified files — committing fixes."
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add -A
-            git commit -m "PHPCBF: auto-fix coding standards"
+            git commit -m "PHPCBF: auto-fix coding standards" || echo "Nothing to commit"
 
             echo "Re-running PHPCBF on committed state (verification)..."
             phpcbf --standard=PSR12 phpcbf/ 2>&1 | tee phpcbf-output-2.txt
@@ -70,5 +66,24 @@ jobs:
             echo "Pushing fixes back to branch."
             BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
             git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git HEAD:$BRANCH --force-with-lease
-          else
-            echo "No changes from PHPCBF."
+            exit 0
+          fi
+
+          # No files changed by PHPCBF — run PHPCS to determine if there are remaining issues.
+          echo "No files changed by PHPCBF. Running PHPCS to check for remaining issues..."
+          phpcs --standard=PSR12 --warning-severity=0 phpcbf/ 2>&1 | tee phpcs-output.txt
+          PHPCS_EXIT=${PIPESTATUS[0]}
+
+          if [ "$PHPCS_EXIT" -eq 0 ]; then
+            echo "No lint errors found. Finishing job."
+            exit 0
+          fi
+
+          echo "Lint errors remain (PHPCS exit $PHPCS_EXIT). Show outputs:"
+          echo "---- PHPCBF output ----"
+          cat phpcbf-output.txt || true
+          echo "---- PHPCS output ----"
+          cat phpcs-output.txt || true
+
+          # Fail so author fixes non-fixable issues locally
+          exit $PHPCS_EXIT
