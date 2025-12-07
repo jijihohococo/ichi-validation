@@ -73,14 +73,26 @@ jobs:
       - name: Run PHPCBF (auto-fix)
         id: phpcbf
         run: |
-          # run auto-fixer but don't fail workflow on non-zero exit
-          phpcbf --standard=PSR12 phpcbf/ || true
-          if git diff --quiet; then
-            echo "changed=false" >> $GITHUB_OUTPUT
-          else
+          # run auto-fixer and handle its exit code without using '|| true'
+          phpcbf --standard=PSR12 phpcbf/
+          EXIT_CODE=$?
+
+          # If PHPCBF changed files, mark changed=true regardless of exit code
+          if ! git diff --quiet; then
             echo "changed=true" >> $GITHUB_OUTPUT
             git --no-pager diff --name-only
+            exit 0
           fi
+
+          # No changes were made by PHPCBF
+          if [ "$EXIT_CODE" -eq 0 ]; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # PHPCBF returned a non-zero exit code but didn't change files -> treat as error
+          echo "PHPCBF exited with code $EXIT_CODE and made no changes. Failing the step."
+          exit $EXIT_CODE
 
       # Only one matrix job should amend & push to avoid races. use 8.3 as canonical job.
       - name: Amend commit and push fixes (only from php 8.3 matrix job)
