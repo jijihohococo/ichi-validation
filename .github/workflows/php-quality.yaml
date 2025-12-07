@@ -1,5 +1,10 @@
 name: PHP Auto-Fix & Quality Check
 
+# allow workflow to push and update checks; keep minimal permissions
+permissions:
+  contents: write
+  checks: write
+
 on:
   push:
     branches:
@@ -8,69 +13,28 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  # 🔧 Auto-fix coding standards (only once, PHP 8.1)
+  # install PHPCBF only (no auto-commit here)
   phpcbf-fix:
     runs-on: ubuntu-latest
     steps:
-      # 1️⃣ Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref || github.ref_name }}
-          persist-credentials: false  # allows bot to push fixes
+          persist-credentials: false
 
-      # 2️⃣ Setup PHP (single version for auto-fix)
       - name: Setup PHP 8.3
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.3
           coverage: none
 
-      # 3️⃣ Install PHPCS
-      - name: Install PHPCS
+      - name: Install PHPCS (composer global)
         run: |
           composer global require squizlabs/php_codesniffer
           echo "$HOME/.config/composer/vendor/bin" >> $GITHUB_PATH
 
-      # 4️⃣ Run PHPCBF (auto-fix issues)
-      - name: Run PHPCBF
-        run: |
-          # Run PHPCBF but ignore exit code so workflow continues
-          phpcbf --standard=PSR12 phpcbf/ || true
-
-          # Check if PHPCBF changed any files
-          if ! git diff --quiet; then
-            echo "PHPCBF_CHANGED=true" >> $GITHUB_ENV
-          else
-            echo "PHPCBF_CHANGED=false" >> $GITHUB_ENV
-          fi
-
-      # 5️⃣ Commit & push fixes back to branch
-      - name: Commit and push PHPCBF fixes
-        if: env.PHPCBF_CHANGED == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Add all PHPCBF-modified files
-          git add .
-
-          # Commit with message
-          git commit -m "PHPCBF: auto-fix coding standards"
-
-          # Determine branch to push
-          BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
-
-          # Pull latest to avoid push rejection
-          git fetch origin $BRANCH
-          git rebase origin/$BRANCH
-
-          # Push PHPCBF fixes
-          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git HEAD:$BRANCH
-
-  # 🧪 Run PHPCS + PHPStan on multiple PHP versions
+  # Run PHPCS + PHPStan on multiple PHP versions and apply fixes to the same commit (if needed)
   php-quality:
     runs-on: ubuntu-latest
     needs: phpcbf-fix
@@ -80,27 +44,63 @@ jobs:
         php-version: [7.3, 7.4, 8.0, 8.1, 8.2, 8.3]
 
     steps:
-      # 1️⃣ Checkout code
-      - name: Checkout code
+      - name: Checkout code (allow pushing and full history)
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
 
-      # 2️⃣ Setup PHP for matrix
       - name: Setup PHP ${{ matrix.php-version }}
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
           coverage: none
 
-      # 3️⃣ Install PHPStan + PHPCS
-      - name: Install PHPStan and PHPCS
+      - name: Add composer global bin to PATH
+        run: echo "$HOME/.config/composer/vendor/bin" >> $GITHUB_PATH
+
+      - name: Install PHPStan and PHPCS (if not available)
         run: |
-          composer global require phpstan/phpstan squizlabs/php_codesniffer
+          composer global require phpstan/phpstan squizlabs/php_codesniffer || true
           echo "$HOME/.config/composer/vendor/bin" >> $GITHUB_PATH
 
-      # 4️⃣ Run PHPStan
       - name: Run PHPStan
         run: phpstan analyse phpcbf --memory-limit=1G
 
-      # 5️⃣ Run PHPCS
+      - name: Determine branch name
+        run: echo "BRANCH_NAME=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
+
+      - name: Run PHPCBF (auto-fix)
+        id: phpcbf
+        run: |
+          # run auto-fixer but don't fail workflow on non-zero exit
+          phpcbf --standard=PSR12 phpcbf/ || true
+          if git diff --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            git --no-pager diff --name-only
+          fi
+
+      # Only one matrix job should amend & push to avoid races. use 8.3 as canonical job.
+      - name: Amend commit and push fixes (only from php 8.3 matrix job)
+        if: ${{ steps.phpcbf.outputs.changed == 'true' && matrix.php-version == '8.3' }}
+        env:
+          BRANCH: ${{ env.BRANCH_NAME }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # stage changes from PHPCBF
+          git add -A
+
+          # amend the last commit to keep fixes in the same commit
+          # include [skip ci] to avoid triggering other workflows on this push as extra safety
+          git commit --amend --no-edit -m "$(git log -1 --pretty=%B) [skip ci]" || echo "No changes to commit"
+
+          # push using the GITHUB_TOKEN and force-with-lease to update the same branch
+          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }} HEAD:${BRANCH} --force-with-lease
+
       - name: Run PHPCS (lint only)
         run: phpcs --standard=PSR12 --warning-severity=0 phpcbf/
