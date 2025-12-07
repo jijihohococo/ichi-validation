@@ -33,8 +33,24 @@ jobs:
           composer global require squizlabs/php_codesniffer
           echo "$HOME/.config/composer/vendor/bin" >> $GITHUB_PATH
 
-      # 4️⃣ Run PHPCBF (auto-fix issues). Fail on phpcbf error. If fixes applied, commit, re-check and push.
-      # ...existing code...
+      # 4️⃣ Ensure phpcbf is available (retry a few times) before running it
+      - name: Wait for phpcbf to be available
+        run: |
+          RETRIES=6
+          COUNT=0
+          until command -v phpcbf >/dev/null 2>&1 || [ $COUNT -ge $RETRIES ]; do
+            echo "phpcbf not found yet, sleeping..."
+            sleep 2
+            COUNT=$((COUNT+1))
+          done
+          if ! command -v phpcbf >/dev/null 2>&1; then
+            echo "phpcbf not available after retries. Listing composer bin for debugging:"
+            ls -la "$HOME/.config/composer/vendor/bin" || true
+            exit 1
+          fi
+          echo "phpcbf is available at: $(command -v phpcbf)"
+
+      # 5️⃣ Run PHPCBF (auto-fix issues). Fail on phpcbf error. If fixes applied, commit, re-check and push.
       - name: Run PHPCBF and commit fixes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
