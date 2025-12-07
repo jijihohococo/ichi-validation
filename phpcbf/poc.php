@@ -1,6 +1,6 @@
 <?php
 
-class PHPCBF_POC
+class POC
 {
     private $name, $category;
     public function test()
