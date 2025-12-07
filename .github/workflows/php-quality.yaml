@@ -73,9 +73,10 @@ jobs:
       - name: Run PHPCBF (auto-fix)
         id: phpcbf
         run: |
-          # run auto-fixer and handle its exit code without using '|| true'
-          phpcbf --standard=PSR12 phpcbf/
-          EXIT_CODE=$?
+          # run auto-fixer and capture exit code
+          set -o pipefail
+          phpcbf --standard=PSR12 phpcbf/ 2>&1 | tee phpcbf-output.txt
+          EXIT_CODE=${PIPESTATUS[0]}
 
           # If PHPCBF changed files, mark changed=true regardless of exit code
           if ! git diff --quiet; then
@@ -90,8 +91,15 @@ jobs:
             exit 0
           fi
 
-          # PHPCBF returned a non-zero exit code but didn't change files -> treat as error
-          echo "PHPCBF exited with code $EXIT_CODE and made no changes. Failing the step."
+          # PHPCBF returned a non-zero exit code and made no changes.
+          # Show collected PHPCBF output and run PHPCS to list the remaining problems.
+          echo "PHPCBF exited with code $EXIT_CODE and made no changes. See details below."
+          echo "---- PHPCBF output ----"
+          cat phpcbf-output.txt || true
+          echo "---- PHPCS (full report) ----"
+          phpcs --standard=PSR12 --warning-severity=0 phpcbf/ || true
+
+          # Fail the step so the author must fix unfixable issues locally.
           exit $EXIT_CODE
 
       # Only one matrix job should amend & push to avoid races. use 8.3 as canonical job.
