@@ -4,7 +4,7 @@ namespace IchiValidation\Phpcbf;
 
 class Poc
 {
-    private $name, $category;
+    private $name,$category;
     public function test()
     {
          echo "test";
