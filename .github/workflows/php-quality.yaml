@@ -12,13 +12,12 @@ jobs:
   phpcbf-fix:
     runs-on: ubuntu-latest
     steps:
-      # 1️⃣ Checkout code (allow pushing)
+      # 1️⃣ Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref || github.ref_name }}
-          fetch-depth: 0
-          persist-credentials: true
+          persist-credentials: false  # allows bot to push fixes
 
       # 2️⃣ Setup PHP (single version for auto-fix)
       - name: Setup PHP 8.3
@@ -33,85 +32,75 @@ jobs:
           composer global require squizlabs/php_codesniffer
           echo "$HOME/.config/composer/vendor/bin" >> $GITHUB_PATH
 
-      # 4️⃣ Ensure phpcbf is available (retry a few times) before running it
-      - name: Wait for phpcbf to be available
+      # 4️⃣ Run PHPCBF (auto-fix issues)
+      - name: Run PHPCBF
         run: |
-          RETRIES=6
-          COUNT=0
-          until command -v phpcbf >/dev/null 2>&1 || [ $COUNT -ge $RETRIES ]; do
-            echo "phpcbf not found yet, sleeping..."
-            sleep 2
-            COUNT=$((COUNT+1))
-          done
-          if ! command -v phpcbf >/dev/null 2>&1; then
-            echo "phpcbf not available after retries. Listing composer bin for debugging:"
-            ls -la "$HOME/.config/composer/vendor/bin" || true
-            exit 1
-          fi
-          echo "phpcbf is available at: $(command -v phpcbf)"
+          # Run PHPCBF but ignore exit code so workflow continues
+          phpcbf --standard=PSR12 phpcbf/ || true
 
-      # 5️⃣ Run PHPCBF (auto-fix issues). Fail on phpcbf error. If fixes applied, commit, re-check and push.
-      - name: Run PHPCBF and commit fixes
+          # Check if PHPCBF changed any files
+          if ! git diff --quiet; then
+            echo "PHPCBF_CHANGED=true" >> $GITHUB_ENV
+          else
+            echo "PHPCBF_CHANGED=false" >> $GITHUB_ENV
+          fi
+
+      # 5️⃣ Commit & push fixes back to branch
+      - name: Commit and push PHPCBF fixes
+        if: env.PHPCBF_CHANGED == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set -o pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          set +e
+          # Add all PHPCBF-modified files
+          git add .
 
-          echo "Running PHPCBF (first pass)..."
-          phpcbf --standard=PSR12 phpcbf/ 2>&1 | tee phpcbf-output.txt
-          EXIT_CODE=${PIPESTATUS[0]}
+          # Commit with message
+          git commit -m "PHPCBF: auto-fix coding standards"
 
-          # PHPCBF sometimes returns non-zero for 'No fixable errors were found'. Treat that as success.
-          if [ "$EXIT_CODE" -ne 0 ]; then
-            if grep -qi "No fixable errors were found" phpcbf-output.txt; then
-              echo "PHPCBF reported no fixable errors; treating as success."
-              EXIT_CODE=0
-            fi
-          fi
+          # Determine branch to push
+          BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
 
-          # If PHPCBF changed files -> commit, verify and push
-          if ! git diff --quiet; then
-            echo "PHPCBF modified files — committing fixes."
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add -A
-            git commit -m "PHPCBF: auto-fix coding standards [skip ci]" || echo "Nothing to commit"
+          # Pull latest to avoid push rejection
+          git fetch origin $BRANCH
+          git rebase origin/$BRANCH
 
-            echo "Re-running PHPCBF on committed state (verification)..."
-            phpcbf --standard=PSR12 phpcbf/ 2>&1 | tee phpcbf-output-2.txt
-            EXIT_CODE2=${PIPESTATUS[0]}
+          # Push PHPCBF fixes
+          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git HEAD:$BRANCH
 
-            if [ "$EXIT_CODE2" -ne 0 ]; then
-              echo "PHPCBF verification run failed with code $EXIT_CODE2. See output:"
-              cat phpcbf-output-2.txt || true
-              exit $EXIT_CODE2
-            fi
+  # 🧪 Run PHPCS + PHPStan on multiple PHP versions
+  php-quality:
+    runs-on: ubuntu-latest
+    needs: phpcbf-fix
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: [7.3, 7.4, 8.0, 8.1, 8.2, 8.3]
 
-            echo "Pushing fixes back to branch."
-            BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
-            git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git HEAD:$BRANCH --force-with-lease
-            exit 0
-          fi
+    steps:
+      # 1️⃣ Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-          # No files changed by PHPCBF.
-          if [ "$EXIT_CODE" -eq 0 ]; then
-            echo "PHPCBF completed with no changes and no errors. Finishing job."
-            exit 0
-          fi
+      # 2️⃣ Setup PHP for matrix
+      - name: Setup PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: none
 
-          # PHPCBF returned non-zero and made no changes -> show diagnostics and run PHPCS
-          echo "PHPCBF exited with code $EXIT_CODE and made no changes. Showing outputs and running PHPCS for details:"
-          echo "---- PHPCBF output ----"
-          cat phpcbf-output.txt || true
+      # 3️⃣ Install PHPStan + PHPCS
+      - name: Install PHPStan and PHPCS
+        run: |
+          composer global require phpstan/phpstan squizlabs/php_codesniffer
+          echo "$HOME/.config/composer/vendor/bin" >> $GITHUB_PATH
 
-          echo "Running PHPCS to list remaining issues..."
-          phpcs --standard=PSR12 --warning-severity=0 phpcbf/ 2>&1 | tee phpcs-output.txt
-          PHPCS_EXIT=${PIPESTATUS[0]}
+      # 4️⃣ Run PHPStan
+      - name: Run PHPStan
+        run: phpstan analyse phpcbf --memory-limit=1G
 
-          echo "---- PHPCS output ----"
-          cat phpcs-output.txt || true
-
-          # Fail so author fixes non-fixable issues locally
-          exit $PHPCS_EXIT
+      # 5️⃣ Run PHPCS
+      - name: Run PHPCS (lint only)
+        run: phpcs --standard=PSR12 --warning-severity=0 phpcbf/
