@@ -380,6 +380,23 @@ class Validator
             $validatedRules = is_array($field) ? $field : explode('|', $field);
 
             foreach ($validatedRules as $rule) {
+                if (is_object($rule)) {
+                    if (!$rule instanceof CustomValidator) {
+                        $this->throwSystemErrorMessage();
+                    }
+
+                    $rule->setAttribute($key);
+                    if (isset($this->data[$key])) {
+                        $rule->setValue($this->data[$key]);
+                        if (!$rule->rule()) {
+                            $errors[$key] = $rule->showErrorMessage();
+                        }
+                    } else {
+                        $errors[$key] = $rule->showErrorMessage();
+                    }
+                    break;
+                }
+
                 $ruleString = explode(':', $rule);
                 $countRuleString = count($ruleString);
                 $params = $countRuleString == 2 ? explode(',', $ruleString[1]) : null;
@@ -399,19 +416,6 @@ class Validator
                     $this->checkImageRatioError($countRuleString, $ruleString)
                 ) {
                     $this->throwSystemErrorMessage();
-                }
-
-                if (is_object($rule) && ($rule instanceof CustomValidator)) {
-                    $rule->setAttribute($key);
-                    if (isset($this->data[$key])) {
-                        $rule->setValue($this->data[$key]);
-                        if (!$rule->rule()) {
-                            $errors[$key] = $rule->showErrorMessage();
-                        }
-                    } else {
-                        $errors[$key] = $rule->showErrorMessage();
-                    }
-                    break;
                 }
 
                 switch ($countRuleString) {
