@@ -8,8 +8,10 @@ class ValidationCommand
 {
     private $path = 'app/Validations';
     private $validationCommandLine = 'make:validation';
+    private $green = "\033[0;32m";
+    private $red = "\033[01;31m";
+    private $end = " \033[0m";
     private $createdFile;
-
 
     public function setPath(string $path)
     {
@@ -21,6 +23,16 @@ class ValidationCommand
         return $this->path;
     }
 
+    public function successMessage(string $message)
+    {
+        return $this->green . $message . $this->end . PHP_EOL;
+    }
+
+    public function errorMessage(string $message)
+    {
+        return $this->red . $message . $this->end . PHP_EOL;
+    }
+
     private function getNamespace(string $defaulFolder)
     {
         return str_replace('/', '\\', ucfirst($defaulFolder));
@@ -28,25 +40,25 @@ class ValidationCommand
 
     private function alreadyHave(string $createdFile, string $createdOption)
     {
-        echo $createdFile . " " . $createdOption . " is already created" . PHP_EOL;
+        echo $this->errorMessage($createdFile . " " . $createdOption . " is already created");
         exit();
     }
 
     private function success(string $createdFile, string $createdOption)
     {
-        echo $createdFile . " " . $createdOption . " is created successfully" . PHP_EOL;
+        echo $this->successMessage($createdFile . " " . $createdOption . " is created successfully");
         exit();
     }
 
     private function wrongCommand()
     {
-        echo "You type wrong command" . PHP_EOL;
+        echo $this->errorMessage("You type wrong command");
         exit();
     }
 
     private function createError(string $createdFile, string $createdOption)
     {
-        echo "You can't create " . $createdFile . " " . $createdOption . PHP_EOL;
+        echo $this->errorMessage("You can't create " . $createdFile . " " . $createdOption);
         exit();
     }
 
