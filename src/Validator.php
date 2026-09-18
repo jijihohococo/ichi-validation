@@ -2,9 +2,8 @@
 
 namespace JiJiHoHoCoCo\IchiValidation;
 
-use PDO,
-
-Exception;
+use PDO;
+use Exception;
 
 class Validator
 {
