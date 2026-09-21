@@ -67,6 +67,7 @@ class ValidationCommand
         return "<?php
 
 namespace " . $this->getNamespace($defaulFolder) . ";
+
 use JiJiHoHoCoCo\IchiValidation\CustomValidator;
 
 class " . $createdFile . " extends CustomValidator
