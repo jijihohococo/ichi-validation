@@ -385,15 +385,11 @@ class Validator
                     }
 
                     $rule->setAttribute($key);
-                    if (isset($this->data[$key])) {
-                        $rule->setValue($this->data[$key]);
-                        if (!$rule->rule()) {
-                            $errors[$key] = $rule->showErrorMessage();
-                        }
-                    } else {
+                    $rule->setValue(isset($this->data[$key]) ? $this->data[$key] : null);
+                    if (!$rule->rule() && !isset($errors[$key])) {
                         $errors[$key] = $rule->showErrorMessage();
                     }
-                    break;
+                    continue;
                 }
 
                 $ruleString = explode(':', $rule);
