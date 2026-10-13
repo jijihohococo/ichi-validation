@@ -74,7 +74,7 @@ We want to validate that 'name' is not null, 'age' must be integer and 'email' m
 use JiJiHoHoCoCo\IchiValidation\Validator;
 
 $validator = new Validator();
-$boolResult = $validator->validate($_REQUEST,[
+$boolResult = $validator->validate($_REQUEST, [
 	'name' => 'required' ,
 	'age' => 'required|integer' ,
 	'email' => ['required','email']
@@ -82,7 +82,7 @@ $boolResult = $validator->validate($_REQUEST,[
 
 // To get error messages in array if the boolResult is FALSE //
 
-$errorMessages=$boolResult==FALSE ? $validator->getErrors() : []; 
+$errorMessages = $boolResult === FALSE ? $validator->getErrors() : []; 
 
 ```
 
@@ -99,7 +99,7 @@ To validate the data is not null or not.
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'name' => 'required'
 ]);
 
@@ -111,7 +111,7 @@ To validate the data is integer or not
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'age' => 'integer'
 ]);
 
@@ -123,7 +123,7 @@ To validate the data is string or not
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'phone' => 'string'
 ])
 
@@ -136,7 +136,7 @@ To validate the data is boolean or not
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'married' => 'bool'
 ]);
 
@@ -149,7 +149,7 @@ To validate the data is double or not
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'weight' => 'double'
 ]);
 
@@ -161,7 +161,7 @@ To validate the data is array or not
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'highlights' => 'array'
 ]);
 
@@ -173,7 +173,7 @@ To validate the data is in the email format or not
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'email' => 'email'
 ]);
 
@@ -185,7 +185,7 @@ To validate the ```$_FILES```'s parameter is null or not
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'image' => 'file'
 ]);
 
@@ -197,7 +197,7 @@ To validate the uploaded file is image or not
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'image' => 'image'
 ]);
 
@@ -209,7 +209,7 @@ To validate the "field" is same as "confirm_field" or not
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'password' => 'confirmed'
 ]);
 
@@ -223,7 +223,7 @@ If the data is string, it is aimed to validate the number of this data string le
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'name' => 'min:10'
 ]);
 
@@ -233,7 +233,7 @@ If the data is number, it is aimed to validate this number is greater than the d
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'age' => 'min:18'
 ]);
 
@@ -243,7 +243,7 @@ If the data is uploaded file, it is aimed to validate the size of this uploaded 
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'image' => 'min:3'
 ]);
 
@@ -255,7 +255,7 @@ If the data is string, it is aimed to validate the number of this data string le
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'name' => 'max:10'
 ]);
 
@@ -265,7 +265,7 @@ If the data is number, it is aimed to validate this number is less than the decl
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'age' => 'max:18'
 ]);
 
@@ -275,7 +275,7 @@ If the data is uploaded file, it is aimed to validate the size of this uploaded 
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'image' => 'max:3'
 ]);
 
@@ -297,7 +297,7 @@ And then you can use this method.
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'email' => 'unique:user_table,email_field,NULL'
 ]);
 
@@ -311,7 +311,7 @@ You can also make this way to validate the same process.
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'email' => 'unique:user_table,email_field,'.NULL
 ]);
 
@@ -321,7 +321,7 @@ $validator->validate($_REQUEST,[
 
 ```php
 
-$validator->validate($_REQUEST,[	
+$validator->validate($_REQUEST, [	
 	'email' => 'unique:user_table,email_field,'. 1
 ]);
 
@@ -336,7 +336,7 @@ If the primary key of the table is not 'id', you must use the below code
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'email' => 'unique:user_table,email_field,'. 1.',user_id'
 ]);
 
@@ -348,7 +348,7 @@ To validate the uploaded file's extension is one of the specific file extensions
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'image' => 'mime:png,jpg,jpeg,gif'
 ]);
 
@@ -360,7 +360,7 @@ To validate the request number is between the specific two numbers or not
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'age' => 'between:18,25'
 ]);
 
@@ -384,7 +384,7 @@ To validate the uploaded image's width is delcared width or not
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'image' => 'dimensions:width=100' 
 ]);
 
@@ -396,7 +396,7 @@ To validate the uploaded image's width is greater than the declared minimum widt
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'image' => 'dimensions:min_width=100'
 ]);
 
@@ -408,7 +408,7 @@ To validate the uploaded image's width is less than the delcared maximum width o
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'image' => 'dimensions:max_width=100'
 ]);
 
@@ -420,7 +420,7 @@ To validate the uploaded image's height is delcared width or not
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'image' => 'dimensions:height=100'
 ]);
 
@@ -432,7 +432,7 @@ To validate the uploaded image's height is greater than the declared minimum hei
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'image' => 'dimensions:min_height=100'
 ]);
 
@@ -444,7 +444,7 @@ To validate the uploaded image's height is less than the delcared maximum height
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'image' => 'dimensions:max_height=100'
 ]);
 
@@ -456,7 +456,7 @@ You can validate your image's dimensions with multiple sub-methods
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'image' => 'dimensions:width=100,height=100'
 ]);
 
@@ -468,7 +468,7 @@ To validate the uploaded image width and height is same as the declared ratio
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'image' => 'image_ratio:1/3'
 ]);
 
@@ -482,10 +482,10 @@ You can customize the error message for validation
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'name' => 'required',
 	'email' => ['required','string','email']
-],[
+], [
 	'required' => 'Data is required'
 ]);
 
@@ -495,10 +495,10 @@ Above code is customizing the error message when the 'required' validation metho
 
 ```php
 
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'name' => 'required',
 	'email' => 'required|string|email'
-],[
+], [
 	'name.required' => 'Name is required',
 ]);
 
@@ -522,7 +522,6 @@ Firstly you need to created the file named "ichi" under your project folder and 
 require __DIR__.'/vendor/autoload.php';
 
 use JiJiHoHoCoCo\IchiValidation\Command\ValidationCommand;
-
 
 $validationCommand = new ValidationCommand;
 $validationCommand->run(__DIR__,$argv);
@@ -557,27 +556,24 @@ Let's make to accept only over age 21 in this created class to validate.
 namespace App\Validations;
 use JiJiHoHoCoCo\IchiValidation\CustomValidator;
 
-class TestValidation extends CustomValidator{
+class TestValidation extends CustomValidator
+{
 
-
-	public function __construct(){
-
+	public function __construct()
+	{
 
 	}
 
-
-	public function rule(){
-
+	public function rule()
+	{
 		return $this->value>21;
 	}
 
 
-	public function showErrorMessage(){
-
+	public function showErrorMessage()
+	{
 		return 'Your ' .$this->attribute . ' should be over 21.';
-
 	}
-
 
 }
 ```
@@ -589,9 +585,9 @@ In calling your validation class
 use App\Validations\TestValidation;
 
 $validator = new Validator;
-$validator->validate($_REQUEST,[
+$validator->validate($_REQUEST, [
 	'name' => 'required|string',
-	'age' => ['required',new TestValidation()]
+	'age' => ['required', new TestValidation()]
 ]);
 ```
 
