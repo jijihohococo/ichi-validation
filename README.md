@@ -42,6 +42,7 @@ This package is Open Source According to [MIT license](LICENSE.md)
 	- [Customization](#customization)
 		- [Customizing Error Message](#customizing-error-message)
 		- [Customizing Validation Method](#customizing-validation-method)
+	- [Supported PHP Versions](#supported-php-versions)
 
 
 ## Installation
@@ -608,3 +609,7 @@ $this->value
 It is the data value. For the example, it is the value of 'age' request.
 
 You can pass other values in the constructor.
+
+## Supported PHP Versions
+
+7.3, 7.4, 8.0, 8.1, 8.2, 8.3, 8.4, 8.5
